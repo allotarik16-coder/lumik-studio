@@ -1,0 +1,23 @@
+{
+  "name": "lumik-studio",
+  "version": "1.0.0",
+  "description": "LUMIK Studio - AI image generation for e-commerce",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@supabase/supabase-js": "^2.39.7",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16"
+  }
+}
