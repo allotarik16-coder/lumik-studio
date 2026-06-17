@@ -1,0 +1,47 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next/out",
+  "functions": {
+    "api/**/*.js": {
+      "maxDuration": 300,
+      "memory": 1024
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/batch-lumik-images",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/bulkdirect-reddit-pipeline",
+      "schedule": "0 3 * * *"
+    }
+  ],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
+    "SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "ANTHROPIC_API_KEY": "@anthropic_api_key",
+    "MUAPI_KEY": "@muapi_key"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/batch-lumik",
+      "destination": "/api/cron/batch-lumik-images"
+    },
+    {
+      "source": "/api/batch-bulkdirect",
+      "destination": "/api/cron/bulkdirect-reddit-pipeline"
+    }
+  ]
+}
