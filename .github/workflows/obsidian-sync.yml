@@ -1,0 +1,58 @@
+name: Sync Obsidian Produits
+
+on:
+  push:
+    paths:
+      - 'LUMIK/Produits/**/*.md'
+  schedule:
+    - cron: '0 9 * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse Obsidian → CSV
+        run: |
+          python3 << 'EOF'
+          import os, re, csv
+          
+          rows = []
+          for root, dirs, files in os.walk('LUMIK/Produits'):
+            for f in files:
+              if not f.endswith('.md'): continue
+              path = os.path.join(root, f)
+              with open(path, 'r', encoding='utf-8') as file:
+                content = file.read()
+              
+              id_match = re.search(r'\*\*ID\*\*\s*:\s*(\d+)', content)
+              emoji_match = re.search(r'\*\*Emoji\*\*\s*:\s*(.)', content)
+              prix_match = re.search(r'\*\*Prix EUR\*\*\s*:\s*(\d+)', content)
+              region_match = re.search(r'\*\*Région\*\*\s*:\s*(\w+)', content)
+              name_match = re.search(r'^#\s+(.+)$', content, re.M)
+              
+              if name_match and id_match and prix_match:
+                rows.append({
+                  'id': id_match.group(1),
+                  'nom': name_match.group(1).strip(),
+                  'emoji': emoji_match.group(1) if emoji_match else '📦',
+                  'prix_vente_eur': prix_match.group(1),
+                  'region': region_match.group(1) if region_match else 'Japon'
+                })
+          
+          with open('produits.csv', 'w', newline='', encoding='utf-8') as f:
+            w = csv.DictWriter(f, ['id', 'nom', 'emoji', 'prix_vente_eur', 'region'])
+            w.writeheader()
+            w.writerows(rows)
+          
+          print(f"✅ {len(rows)} produits parsés")
+          EOF
+
+      - name: Commit & Push
+        run: |
+          git config user.name "Obsidian Sync"
+          git config user.email "sync@lumik.local"
+          git add produits.csv
+          git commit -m "sync: Obsidian → produits.csv" || true
+          git push
